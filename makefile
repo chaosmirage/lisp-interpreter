@@ -1,12 +1,11 @@
 CC = clang
 
-NAME = lisp
-SRC = $(NAME).c
-EXENAME = $(NAME)
+FLAGS = -Wall -Wextra -Werror
+DEBUGFLAGS = -g $(FLAGS)
+OUTDIR = bin
 
-FLAGS = -Wall -Wextra
+default: lisp.c
+	$(CC) $(FLAGS) $^ -o $(OUTDIR)/lisp && $(OUTDIR)/lisp
 
-default: runtest
-
-runtest:
-	$(CC) test.c $(SRC) -o test && ./test
+debug: lisp.c
+	$(CC) $(DEBUGFLAGS) $^ -o $(OUTDIR)/lisp && $(OUTDIR)/./lisp
