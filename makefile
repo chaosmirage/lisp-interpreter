@@ -1,6 +1,6 @@
 CC = clang
 
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra
 DEBUGFLAGS = -g $(FLAGS)
 OUTDIR = bin
 

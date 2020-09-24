@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 enum node_type {
   LIST,
@@ -12,6 +13,18 @@ struct node {
   char value;
 };
 
+void tokenize(char *str) {
+  char *strCopy = strdup(str);
+  char delim[] = " ";
+
+  char * token = strtok(strCopy, delim);
+
+  while(token != NULL) {
+    printf("%s\n", token);
+    token = strtok(NULL, delim);
+  }
+}
+
 struct node* parse(char *str) {
   // TODO: стоит назвать current_char_pointer?
   char *current_char;
@@ -19,7 +32,7 @@ struct node* parse(char *str) {
   struct node *first = NULL, *last = NULL, *tmp;
 
   for (current_char = str; *current_char; current_char++) {
-    tmp = malloc(sizeof(struct node));
+    tmp = calloc(1 ,sizeof(struct node));
 
     tmp->type = SYMBOL;
     tmp->value = *current_char;
@@ -68,7 +81,8 @@ int main(int argc, char **argv) {
 
   struct node *parsed = parse(input);
 
-  traverse_linked_list(parsed, &print_list_item);
+  // traverse_linked_list(parsed, &print_list_item);
 
+  tokenize(input);
   return 0;
 }
