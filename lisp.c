@@ -13,14 +13,47 @@ struct node {
   char value;
 };
 
+// Выделить память под буфер: длина исходной строки + длина строки замены
+// Найти позицию заменяемого символа
+// Скопировать в буфер всё что есть слева от искомого символа
+// Вставить в буфер замену
+// Скопировать в буфер всё что есть справа от искомого символа
+
+void replace_all_char_by_str(char *str, int char_to_be_replaced, const char replace_str[]) {
+  int buf_size = strlen(str) + strlen(replace_str);
+  char *buf = (char*)malloc(buf_size);
+  char *occurrence_pointer = strchr(str, char_to_be_replaced);
+
+
+  buf = strncpy(buf, str, occurrence_pointer - str);
+
+  int buf_length = strlen(buf);
+
+  strcpy(buf + buf_length, replace_str);
+  buf_length += strlen(replace_str);
+  strcpy(buf + buf_length, str + 1);
+
+   // printf("occurrence_pointer = %s\n", occurrence_pointer);
+
+  printf("buf = %s\n", buf);
+
+  strcpy(str, buf);
+  free(buf);
+}
+
 void tokenize(char *str) {
   char *strCopy = strdup(str);
   char delim[] = " ";
 
-  char * token = strtok(strCopy, delim);
+  replace_all_char_by_str(strCopy, '(', " ( ");
+  // replace_all_char_by_str(strCopy, ')', " ) ");
+
+  // printf("%s\n", strCopy);
+
+  char *token = strtok(strCopy, delim);
 
   while(token != NULL) {
-    printf("%s\n", token);
+    // printf("%s\n", token);
     token = strtok(NULL, delim);
   }
 }
@@ -32,7 +65,7 @@ struct node* parse(char *str) {
   struct node *first = NULL, *last = NULL, *tmp;
 
   for (current_char = str; *current_char; current_char++) {
-    tmp = calloc(1 ,sizeof(struct node));
+    tmp = calloc(1, sizeof(struct node));
 
     tmp->type = SYMBOL;
     tmp->value = *current_char;
@@ -77,7 +110,7 @@ int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  char input[] = "(+ 1 (+ 1 1))";
+  char input[] = "(+ 1 (+ 2 1))";
 
   struct node *parsed = parse(input);
 
