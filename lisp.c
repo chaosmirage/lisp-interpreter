@@ -13,27 +13,30 @@ struct node {
   char value;
 };
 
-// Выделить память под буфер: длина исходной строки + длина строки замены
+// Выделить память под буфер: длина исходной строки
+  // Если в строке найден символ, то нужно увеличить память под буфер на размер replace_str
 // Найти позицию заменяемого символа
 // Скопировать в буфер всё что есть слева от искомого символа
 // Вставить в буфер замену
 // Скопировать в буфер всё что есть справа от искомого символа
+// Найти следующий символ в строке начиная со следующей позиции от предыдущего найденного
 
 void replace_all_char_by_str(char *str, int char_to_be_replaced, const char replace_str[]) {
-  int buf_size = strlen(str) + strlen(replace_str);
-  char *buf = (char*)malloc(buf_size);
+  char *buf = (char*)malloc(strlen(str));
   char *occurrence_pointer = strchr(str, char_to_be_replaced);
 
+  while (occurrence_pointer != NULL) {
+    buf = realloc(buf, strlen(str) + strlen(replace_str));
+    buf = strncpy(buf, str, occurrence_pointer - str);
 
-  buf = strncpy(buf, str, occurrence_pointer - str);
+    int buf_length = strlen(buf);
 
-  int buf_length = strlen(buf);
+    strcpy(buf + buf_length, replace_str);
+    buf_length += strlen(replace_str);
+    strcpy(buf + buf_length, str + 1);
 
-  strcpy(buf + buf_length, replace_str);
-  buf_length += strlen(replace_str);
-  strcpy(buf + buf_length, str + 1);
-
-   // printf("occurrence_pointer = %s\n", occurrence_pointer);
+    occurrence_pointer = strchr(occurrence_pointer + 1, char_to_be_replaced);
+  }
 
   printf("buf = %s\n", buf);
 
