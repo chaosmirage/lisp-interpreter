@@ -10,7 +10,10 @@ enum node_type {
 struct node {
   struct node *next;
   enum node_type type;
-  char value;
+  union {
+    char *value;
+    struct node *list;
+  };
 };
 
 struct node* parse(char *str) {
@@ -21,9 +24,21 @@ struct node* parse(char *str) {
   for (current_char = str; *current_char; current_char++) {
     tmp = calloc(1, sizeof(struct node));
 
-    tmp->type = SYMBOL;
-    tmp->value = *current_char;
-    tmp->next = NULL;
+    if (*current_char == ')') {
+      break;
+    }
+
+    if (*current_char == '(') {
+      tmp->type = LIST;
+      tmp->list = parse(current_char + 1);
+      tmp->next = NULL;
+    }
+
+    if (*current_char != '(' && *current_char != ')') {
+      tmp->type = SYMBOL;
+      tmp->value = current_char;
+      tmp->next = NULL;
+    }
 
     if (!last) {
       first = tmp;
@@ -47,9 +62,15 @@ char* get_node_type_name(enum node_type type) {
 }
 
 void print_list_item(struct node *item) {
-  printf("LIST ITEM\n");
-  printf("type = %s \n", get_node_type_name(item->type));
-  printf("value = %c \n", item->value);
+  if (item->type == LIST) {
+    printf("%s\n", get_node_type_name(item->type));
+  } else {
+    printf("  %s = %s \n", get_node_type_name(item->type), item->value);
+  }
+
+  if (item->type == LIST) {
+    print_list_item(item->list);
+  }
 }
 
 void traverse_linked_list (struct node *linkedList, void (*handle)(struct node*)) {
