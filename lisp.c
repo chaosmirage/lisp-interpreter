@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+char *current_char;
 
 enum node_type {
   LIST,
@@ -11,47 +14,56 @@ struct node {
   struct node *next;
   enum node_type type;
   union {
-    char *value;
+    char value[1];
     struct node *list;
   };
 };
 
-struct node* parse(char *str) {
-  char *current_char;
+struct node* parse() {
+  struct node *head = NULL, *tail = NULL;
 
-  struct node *first = NULL, *last = NULL, *tmp;
-
-  for (current_char = str; *current_char; current_char++) {
-    tmp = calloc(1, sizeof(struct node));
+  while(*current_char) {
+    struct node *tmp = NULL;
 
     if (*current_char == ')') {
       break;
     }
 
     if (*current_char == '(') {
+      tmp = calloc(1, sizeof(struct node));
       tmp->type = LIST;
-      tmp->list = parse(current_char + 1);
       tmp->next = NULL;
+
+      current_char += 1;
+
+      tmp->list = parse();
     }
 
-    if (*current_char != '(' && *current_char != ')') {
+    if (!isspace(*current_char) && *current_char != '(' && *current_char != ')') {
+      tmp = calloc(1, sizeof(struct node));
+      char buffer[2];
+      buffer[1] = '\0';
+
       tmp->type = SYMBOL;
-      tmp->value = current_char;
       tmp->next = NULL;
+
+      strncpy(buffer, current_char, 1);
+
+      strcpy(tmp->value, buffer);
     }
 
-    if (!last) {
-      first = tmp;
-      last = tmp;
+    if (tmp != NULL) {
+      if (head == NULL) {
+        head = tail = tmp;
+      } else {
+        tail = tail->next = tmp;
+      }
     }
 
-    if (last) {
-      last->next = tmp;
-      last = tmp;
-    }
+    current_char += 1;
   }
 
-  return first;
+  return head;
 }
 
 char* get_node_type_name(enum node_type type) {
@@ -64,12 +76,10 @@ char* get_node_type_name(enum node_type type) {
 void print_list_item(struct node *item) {
   if (item->type == LIST) {
     printf("%s\n", get_node_type_name(item->type));
-  } else {
-    printf("  %s = %s \n", get_node_type_name(item->type), item->value);
   }
 
-  if (item->type == LIST) {
-    print_list_item(item->list);
+  if (item->type == SYMBOL) {
+    printf("  %s = %s \n", get_node_type_name(item->type), item->value);
   }
 }
 
@@ -79,15 +89,19 @@ void traverse_linked_list (struct node *linkedList, void (*handle)(struct node*)
   if (linkedList->next != NULL) {
     traverse_linked_list(linkedList->next, handle);
   }
+
+  if (linkedList->next == NULL && linkedList->type == LIST) {
+    traverse_linked_list(linkedList->list, handle);
+  }
 }
 
 int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  char input[] = "(+ 1 (+ 2 1))";
+  current_char = "(+ 1 (+ 2 1))";
 
-  struct node *parsed = parse(input);
+  struct node *parsed = parse();
 
   traverse_linked_list(parsed, &print_list_item);
 
