@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#define BUFFER_SIZE 256
+
 char *current_char;
 
 enum node_type {
@@ -14,10 +16,33 @@ struct node {
   struct node *next;
   enum node_type type;
   union {
-    char value[1];
+    char *value;
     struct node *list;
   };
 };
+
+int is_term (int c) {
+  return c == '\0' || isspace(c) || c == '(' || c == ')';
+};
+
+char *read_value() {
+  int length = 0;
+  char buffer[BUFFER_SIZE + 1];
+
+  while (!is_term(*current_char) && length < BUFFER_SIZE) {
+    buffer[length] = *current_char;
+
+    current_char += 1;
+    length += 1;
+  }
+
+  buffer[length] = '\0';
+  char *str = malloc((length + 1) * sizeof(char));
+
+  strcpy(str, buffer);
+
+  return str;
+}
 
 struct node* parse() {
   struct node *head = NULL, *tail = NULL;
@@ -39,17 +64,12 @@ struct node* parse() {
       tmp->list = parse();
     }
 
-    if (!isspace(*current_char) && *current_char != '(' && *current_char != ')') {
+    if (!is_term(*current_char)) {
       tmp = calloc(1, sizeof(struct node));
-      char buffer[2];
-      buffer[1] = '\0';
 
       tmp->type = SYMBOL;
       tmp->next = NULL;
-
-      strncpy(buffer, current_char, 1);
-
-      strcpy(tmp->value, buffer);
+      tmp->value = read_value();
     }
 
     if (tmp != NULL) {
@@ -60,7 +80,9 @@ struct node* parse() {
       }
     }
 
-    current_char += 1;
+    if (*current_char != '\0') {
+      current_char += 1;
+    }
   }
 
   return head;
@@ -99,7 +121,7 @@ int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  current_char = "(+ 1 (+ 2 1))";
+  current_char = "(+ 10000 (+ 200 301))";
 
   struct node *parsed = parse();
 
