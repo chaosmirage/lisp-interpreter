@@ -108,23 +108,30 @@ char* get_node_type_name(enum node_type type) {
   }
 }
 
-void print_list_item(struct node *item) {
+void print_list_item(struct node *item, int print_offset) {
+  char *node_type_name = get_node_type_name(item->type);
+  int node_type_name_length = strlen(node_type_name);
+
   if (item->type == LIST) {
-    printf("%s\n", get_node_type_name(item->type));
+    printf("%*s\n", node_type_name_length + print_offset, node_type_name);
   } else {
-    printf("  %s = %s \n", get_node_type_name(item->type), item->value);
+    printf("%*s", node_type_name_length + print_offset * 2, node_type_name);
+    printf(" = %s \n", item->value);
   }
 }
 
-void traverse_linked_list (struct node *linkedList, void (*handle)(struct node*)) {
-  handle(linkedList);
+void traverse_linked_list (struct node *linkedList) {
+  static int list_count = 0;
+
+  print_list_item(linkedList, list_count);
 
   if (linkedList->next != NULL) {
-    traverse_linked_list(linkedList->next, handle);
+    traverse_linked_list(linkedList->next);
   }
 
   if (linkedList->next == NULL && linkedList->type == LIST) {
-    traverse_linked_list(linkedList->list, handle);
+    list_count += 1;
+    traverse_linked_list(linkedList->list);
   }
 }
 
@@ -136,7 +143,7 @@ int main(int argc, char **argv) {
 
   struct node *parsed = parse();
 
-  traverse_linked_list(parsed, &print_list_item);
+  traverse_linked_list(parsed);
 
   return 0;
 }
