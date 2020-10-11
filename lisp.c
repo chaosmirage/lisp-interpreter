@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <string.h>
 
 #define BUFFER_SIZE 256
 
@@ -9,7 +10,8 @@ char *current_char;
 
 enum node_type {
   LIST,
-  SYMBOL
+  SYMBOL,
+  INTEGER,
 };
 
 struct node {
@@ -21,15 +23,19 @@ struct node {
   };
 };
 
-int is_term (int c) {
+int is_terminator (int c) {
   return c == '\0' || isspace(c) || c == '(' || c == ')';
 };
+
+int is_number (int c) {
+  return c >= '0' && c <= '9';
+}
 
 char *read_value() {
   int length = 0;
   char buffer[BUFFER_SIZE + 1];
 
-  while (!is_term(*current_char) && length < BUFFER_SIZE) {
+  while (!is_terminator(*current_char) && length < BUFFER_SIZE) {
     buffer[length] = *current_char;
 
     current_char += 1;
@@ -64,12 +70,18 @@ struct node* parse() {
       tmp->list = parse();
     }
 
-    if (!is_term(*current_char)) {
+    if (!is_terminator(*current_char)) {
       tmp = calloc(1, sizeof(struct node));
 
-      tmp->type = SYMBOL;
-      tmp->next = NULL;
-      tmp->value = read_value();
+      if(is_number(*current_char)) {
+        tmp->type = INTEGER;
+        tmp->next = NULL;
+        tmp->value = read_value();
+      } else {
+        tmp->type = SYMBOL;
+        tmp->next = NULL;
+        tmp->value = read_value();
+      }
     }
 
     if (tmp != NULL) {
@@ -92,15 +104,14 @@ char* get_node_type_name(enum node_type type) {
   switch (type) {
     case LIST: return "List";
     case SYMBOL: return "Symbol";
+    case INTEGER: return "Integer";
   }
 }
 
 void print_list_item(struct node *item) {
   if (item->type == LIST) {
     printf("%s\n", get_node_type_name(item->type));
-  }
-
-  if (item->type == SYMBOL) {
+  } else {
     printf("  %s = %s \n", get_node_type_name(item->type), item->value);
   }
 }
@@ -121,7 +132,7 @@ int main(int argc, char **argv) {
   (void)argc;
   (void)argv;
 
-  current_char = "(+ 10000 (+ 200 301))";
+  current_char = "(+ 10000 (+ 200 301) (car '(1 2)))";
 
   struct node *parsed = parse();
 
