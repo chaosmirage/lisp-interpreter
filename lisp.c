@@ -133,6 +133,10 @@ void traverse_linked_list (struct node *linkedList) {
     list_count += 1;
     traverse_linked_list(linkedList->list);
   }
+
+  if (linkedList->next == NULL) {
+    list_count = 0;
+  }
 }
 
 int main(int argc, char **argv) {
