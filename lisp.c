@@ -51,7 +51,7 @@ char *read_value() {
 }
 
 struct node* parse() {
-  struct node *head = NULL, *tail = NULL;
+  struct node *first = NULL, *last = NULL;
 
   while(*current_char) {
     struct node *tmp = NULL;
@@ -85,10 +85,10 @@ struct node* parse() {
     }
 
     if (tmp != NULL) {
-      if (head == NULL) {
-        head = tail = tmp;
+      if (first == NULL) {
+        first = last = tmp;
       } else {
-        tail = tail->next = tmp;
+        last = last->next = tmp;
       }
     }
 
@@ -97,7 +97,7 @@ struct node* parse() {
     }
   }
 
-  return head;
+  return first;
 }
 
 char* get_node_type_name(enum node_type type) {
