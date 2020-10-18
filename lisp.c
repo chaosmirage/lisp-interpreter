@@ -8,34 +8,41 @@
 
 char *current_char;
 
-enum node_type {
+enum node_type
+{
   LIST,
   SYMBOL,
   INTEGER,
 };
 
-struct node {
+struct node
+{
   struct node *next;
   enum node_type type;
-  union {
+  union
+  {
     char *value;
     struct node *list;
   };
 };
 
-int is_terminator (int c) {
+int is_terminator(int c)
+{
   return c == '\0' || isspace(c) || c == '(' || c == ')';
 };
 
-int is_number (int c) {
+int is_number(int c)
+{
   return c >= '0' && c <= '9';
 }
 
-char *read_value() {
+char *read_value()
+{
   int length = 0;
   char buffer[BUFFER_SIZE + 1];
 
-  while (!is_terminator(*current_char) && length < BUFFER_SIZE) {
+  while (!is_terminator(*current_char) && length < BUFFER_SIZE)
+  {
     buffer[length] = *current_char;
 
     current_char += 1;
@@ -50,17 +57,21 @@ char *read_value() {
   return str;
 }
 
-struct node* parse() {
+struct node *parse()
+{
   struct node *first = NULL, *last = NULL;
 
-  while(*current_char) {
+  while (*current_char)
+  {
     struct node *tmp = NULL;
 
-    if (*current_char == ')') {
+    if (*current_char == ')')
+    {
       break;
     }
 
-    if (*current_char == '(') {
+    if (*current_char == '(')
+    {
       tmp = calloc(1, sizeof(struct node));
       tmp->type = LIST;
       tmp->next = NULL;
@@ -70,29 +81,38 @@ struct node* parse() {
       tmp->list = parse();
     }
 
-    if (!is_terminator(*current_char)) {
+    if (!is_terminator(*current_char))
+    {
       tmp = calloc(1, sizeof(struct node));
 
-      if(is_number(*current_char)) {
+      if (is_number(*current_char))
+      {
         tmp->type = INTEGER;
         tmp->next = NULL;
         tmp->value = read_value();
-      } else {
+      }
+      else
+      {
         tmp->type = SYMBOL;
         tmp->next = NULL;
         tmp->value = read_value();
       }
     }
 
-    if (tmp != NULL) {
-      if (first == NULL) {
+    if (tmp != NULL)
+    {
+      if (first == NULL)
+      {
         first = last = tmp;
-      } else {
+      }
+      else
+      {
         last = last->next = tmp;
       }
     }
 
-    if (*current_char != '\0') {
+    if (*current_char != '\0')
+    {
       current_char += 1;
     }
   }
@@ -100,46 +120,60 @@ struct node* parse() {
   return first;
 }
 
-char* get_node_type_name(enum node_type type) {
-  switch (type) {
-    case LIST: return "List";
-    case SYMBOL: return "Symbol";
-    case INTEGER: return "Integer";
+char *get_node_type_name(enum node_type type)
+{
+  switch (type)
+  {
+  case LIST:
+    return "List";
+  case SYMBOL:
+    return "Symbol";
+  case INTEGER:
+    return "Integer";
   }
 }
 
-void print_list_item(struct node *item, int print_offset) {
+void print_list_item(struct node *item, int print_offset)
+{
   char *node_type_name = get_node_type_name(item->type);
   int node_type_name_length = strlen(node_type_name);
 
-  if (item->type == LIST) {
+  if (item->type == LIST)
+  {
     printf("%*s\n", node_type_name_length + print_offset, node_type_name);
-  } else {
+  }
+  else
+  {
     printf("%*s", node_type_name_length + print_offset * 2, node_type_name);
     printf(" = %s \n", item->value);
   }
 }
 
-void traverse_linked_list (struct node *linkedList) {
+void traverse_linked_list(struct node *linkedList)
+{
   static int list_count = 0;
 
   print_list_item(linkedList, list_count);
 
-  if (linkedList->next != NULL) {
+  if (linkedList->next != NULL)
+  {
     traverse_linked_list(linkedList->next);
   }
 
-  if (linkedList->next == NULL && linkedList->type == LIST) {
+  if (linkedList->next == NULL && linkedList->type == LIST)
+  {
     list_count += 1;
     traverse_linked_list(linkedList->list);
   }
 
-  if (linkedList->next == NULL) {
+  if (linkedList->next == NULL)
+  {
     list_count = 0;
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   (void)argc;
   (void)argv;
 
