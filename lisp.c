@@ -4,6 +4,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#define ADD_OPERATOR '+'
+
 #define BUFFER_SIZE 256
 
 char *current_char;
@@ -120,6 +122,36 @@ struct node *parse()
   return first;
 }
 
+int compute_sum(struct node *linked_list)
+{
+  if (linked_list == NULL)
+  {
+    return 0;
+  }
+
+  if (linked_list->type == INTEGER)
+  {
+    return atoi(linked_list->value) + compute_sum(linked_list->next);
+  }
+
+  return 0;
+}
+
+int eval(struct node *linked_list)
+{
+  if (linked_list->type == SYMBOL && *linked_list->value == ADD_OPERATOR)
+  {
+    return compute_sum(linked_list->next);
+  }
+
+  if (linked_list->type == LIST)
+  {
+    return eval(linked_list->list);
+  }
+
+  return 0;
+}
+
 char *get_node_type_name(enum node_type type)
 {
   switch (type)
@@ -177,11 +209,12 @@ int main(int argc, char **argv)
   (void)argc;
   (void)argv;
 
-  current_char = "(+ 10000 (+ 200 301) (car '(1 2)))";
+  current_char = "(+ 100 200 300)";
+  struct node *parsed_example_1 = parse();
+  traverse_linked_list(parsed_example_1, *print_list_item);
 
-  struct node *parsed = parse();
-
-  traverse_linked_list(parsed, *print_list_item);
+  int computed_sum = eval(parsed_example_1);
+  printf("computed sum = %d\n", computed_sum);
 
   return 0;
 }
