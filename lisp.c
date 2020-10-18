@@ -122,6 +122,19 @@ struct node *parse()
   return first;
 }
 
+int to_integer(char *str)
+{
+  int number = 0;
+
+  while (*str)
+  {
+    number = number * 10 + (*str - '0');
+    str += 1;
+  }
+
+  return number;
+}
+
 int compute_sum(struct node *linked_list)
 {
   if (linked_list == NULL)
@@ -131,7 +144,7 @@ int compute_sum(struct node *linked_list)
 
   if (linked_list->type == INTEGER)
   {
-    return atoi(linked_list->value) + compute_sum(linked_list->next);
+    return to_integer(linked_list->value) + compute_sum(linked_list->next);
   }
 
   return 0;
@@ -209,7 +222,7 @@ int main(int argc, char **argv)
   (void)argc;
   (void)argv;
 
-  current_char = "(+ 100 200 300)";
+  current_char = "(+ 150 200 350)";
   struct node *parsed_example_1 = parse();
   traverse_linked_list(parsed_example_1, *print_list_item);
 
