@@ -4,6 +4,20 @@
 #include <ctype.h>
 #include <string.h>
 
+#ifdef __LP64__
+typedef u_int64_t value_t;
+typedef int64_t number_t;
+#else
+typedef u_int32_t value_t;
+typedef int32_t number_t;
+#endif
+
+#define N_STACK 49152
+static value_t Stack[N_STACK];
+static u_int32_t SP = 0;
+#define PUSH(v) (Stack[SP++] = (v))
+#define POP() (Stack[--SP])
+
 #define ADD_OPERATOR '+'
 
 #define BUFFER_SIZE 256
@@ -137,14 +151,23 @@ int to_integer(char *str)
 
 int compute_sum(struct node *linked_list)
 {
+  number_t result;
+
   if (linked_list == NULL)
   {
-    return 0;
+    result = 0;
+    while (SP)
+    {
+      result += POP();
+    }
+
+    return result;
   }
 
   if (linked_list->type == INTEGER)
   {
-    return to_integer(linked_list->value) + compute_sum(linked_list->next);
+    PUSH(to_integer(linked_list->value));
+    return compute_sum(linked_list->next);
   }
 
   return 0;
